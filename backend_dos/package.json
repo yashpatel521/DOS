@@ -5,14 +5,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "pm:install": "npm install pm2 -g && pm2 update",
+    "pm:start": "pm2 start test.json && pm2 monit",
+    "pm:stop": "pm2 stop DOS && pm2 delete DOS"
   },
   "author": "Yash patel",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "express-rate-limit": "^6.7.1",
+    "express-rate-limit": "^6.9.0",
     "google-play-scraper": "^9.1.1",
     "mysql": "^2.18.1",
     "nodemon": "^3.0.1"

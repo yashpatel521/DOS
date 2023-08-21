@@ -1,56 +1,77 @@
 const express = require("express");
-const dummy = require("./data");
 const conn = require("../config");
-
 const router = express.Router();
 
-//api for test
 router.route("/test").get((req, res) => {
-  var selecctSql = "SELECT * FROM test";
-  conn.query(selecctSql, (err, data) => {
-    if (err) res.status(400).send(err);
-    console.log(data);
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max) + 1;
+  }
 
-    data = data.map((e) => {
-      return {
-        ...e,
-        dummy,
-      };
+  console.log("test");
+
+  const resss = {
+    testResults: [],
+    user: [],
+  };
+
+  for (i = 1; i <= 100; i++) {
+    const selectTestQuery = `SELECT * FROM test WHERE id='${i}'`;
+    conn.query(selectTestQuery, function (error, testRes, fieldsTest) {
+      resss.testResults.push(testRes);
     });
+  }
+  setTimeout(() => {
+    res.status(200).json(resss);
+  }, 2000);
+
+  // conn.query(selectTestQuery, function (error, testRes, fieldsTest) {
+  //   for (var j = 0; j < testRes.length; j++) {
+  //     const rand = getRandomInt(3);
+  //     const selectQuery = `SELECT * FROM user WHERE user_id =${rand}`;
+  //     conn.query(selectQuery, function (err, result, fields) {
+  //       if (err) res.status(400).send(err);
+  //       resss.user.push(result);
+  //     });
+  //     resss.testResults.push(testRes[j]);
+  //   }
+  // });
+});
+
+// Limiter
+const rateLimit = require("express-rate-limit");
+const time = {
+  oneSecond: 1000,
+  oneMinute: 1000 * 60,
+  oneHour: 1000 * 60 * 60,
+  oneDay: 1000 * 60 * 60 * 24,
+};
+
+const maxRequests = 10;
+const maxTimeout = time.oneMinute;
+const rateLimiterUsingThirdParty = rateLimit({
+  windowMs: maxTimeout, // milliseconds
+  max: maxRequests,
+  statusCode: 200,
+  message: {
+    message: `You have exceeded the ${maxRequests} requests in ${
+      maxTimeout / 1000
+    } seconds limit!`,
+    status: true,
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+router.route("/limiter").post(rateLimiterUsingThirdParty, (req, res) => {
+  const selectQuery = `SELECT * FROM user`;
+  console.log(selectQuery);
+  conn.query(selectQuery, function (err, result, fields) {
+    if (err) res.status(400).send(err);
     res.status(200).json({
-      data,
+      result,
+      status: false,
+      query: selectQuery,
     });
   });
 });
-
-// router.route("/insert").get((req, res) => {
-//   dummy.forEach((data) => {
-//     var insertQuery =
-//       "INSERT INTO `test` (`id`, `tid`, `title`, `des`, `price`, `rating`, `stock`, `brand`, `category`, `thumbnail`, `images`) VALUES (NULL, " +
-//       data.id +
-//       '," ' +
-//       data.title +
-//       '", "' +
-//       data.description +
-//       '", ' +
-//       data.price +
-//       ", " +
-//       data.rating +
-//       ", " +
-//       data.stock +
-//       ', "' +
-//       data.brand +
-//       '", "' +
-//       data.category +
-//       '", "' +
-//       data.thumbnail +
-//       '", "' +
-//       data.images[0] +
-//       '")';
-//     conn.query(insertQuery, function (err, result, fields) {
-//       if (err) console.log(err);
-//     });
-//   });
-// });
-
 module.exports = router;

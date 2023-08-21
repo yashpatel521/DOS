@@ -1,0 +1,14 @@
+{
+  "apps": [
+    {
+      "name": "DOS",
+      "script": "index.js",
+      "instances": 1,
+      "autorestart": true,
+      "watch": false,
+      "time": true,
+      "out_file": "/dev/null",
+      "error_file": "/dev/null"
+    }
+  ]
+}
